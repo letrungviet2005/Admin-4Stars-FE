@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
-import UserProfiles from "./pages/Grammar/UserProfiles";
+import Grammar from "./pages/Grammar/Grammar";
 import Videos from "./pages/UiElements/Videos";
 import Images from "./pages/UiElements/Images";
 import Alerts from "./pages/UiElements/Alerts";
@@ -12,13 +12,14 @@ import Buttons from "./pages/UiElements/Buttons";
 import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
 import User from "./pages/User/User";
-import FormElements from "./pages/ArticleAndVideos/Article";
 import Member from "./pages/Member/Member";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import Vocabulary from "./pages/Vocabulary/Vocabulary";
 import Article from "./pages/ArticleAndVideos/Article";
+import Categories from "./pages/Vocabulary/Categories";
+import Admin from "./pages/Admin/Admin";
 
 export default function App() {
   return (
@@ -31,8 +32,9 @@ export default function App() {
             <Route index path="/" element={<Home />} />
 
             {/* Others Page */}
-            <Route path="/grammar" element={<UserProfiles />} />
+            <Route path="/grammar" element={<Grammar />} />
             <Route path="/vocabulary" element={<Vocabulary />} />
+            <Route path="/categories" element={<Categories />} />
             <Route path="/member" element={<Member />} />
 
             {/* Forms */}
@@ -40,6 +42,7 @@ export default function App() {
 
             {/* Tables */}
             <Route path="/user" element={<User />} />
+            <Route path="/admin" element={<Admin />} />
 
             {/* Ui Elements */}
             <Route path="/alerts" element={<Alerts />} />

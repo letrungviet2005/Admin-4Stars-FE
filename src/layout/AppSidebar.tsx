@@ -34,7 +34,7 @@ const navItems: NavItem[] = [
   {
     icon: <CalenderIcon />,
     name: "Vocabulary",
-    subItems: [{ name: "Topic", path: "/topic", pro: false },{name: "Vocabulary", path: "/vocabulary", pro: false}],
+    subItems: [{ name: "Categories", path: "/categories", pro: false },{name: "Vocabulary", path: "/vocabulary", pro: false}],
   },
   {
     icon: <UserCircleIcon />,
@@ -59,7 +59,7 @@ const navItems: NavItem[] = [
     icon: <PageIcon />,
     subItems: [
       { name: "Members Register", path: "/member", pro: false },
-      { name: "Admin", path: "/error-404", pro: false },
+      { name: "Admin", path: "/admin", pro: false },
     ],
   },
 ];
@@ -311,10 +311,10 @@ const AppSidebar: React.FC = () => {
             <>
               <img
                 className="dark:hidden"
-                src="/images/logo/logo.svg"
+                src="/images/logo/logo.png"
                 alt="Logo"
-                width={150}
-                height={40}
+                width={70}
+                height={20}
               />
               <img
                 className="hidden dark:block"
