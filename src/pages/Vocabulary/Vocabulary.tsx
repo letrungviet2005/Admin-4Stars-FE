@@ -27,31 +27,34 @@ const Vocabulary: React.FC = () => {
   const [searchParams] = useSearchParams();
   const category = searchParams.get("category");
   const accessToken = localStorage.getItem("accessToken");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    loadVocabularies(currentPage);
+  }, [category, currentPage]);
 
   useEffect(() => {
     loadVocabularies();
   }, [category]);
 
-  const loadVocabularies = async () => {
+  const loadVocabularies = async (page: number) => {
     try {
-      const page = 1;
-      const size = 100;
+      const size = 5;
       const sort = "id,asc";
-      const accessToken = localStorage.getItem("accessToken");
-  
+
       const queryParams = new URLSearchParams({
         page: String(page),
         size: String(size),
-        sort: sort,
+        sort,
       });
-  
+
       if (category) {
         queryParams.append("categoryId", category);
       }
-  
+
       const endpoint = `${config}admin/vocabularies?${queryParams.toString()}`;
-      console.log("Fetching vocabularies from:", endpoint);
-  
+
       const response = await fetch(endpoint, {
         method: "GET",
         headers: {
@@ -59,27 +62,31 @@ const Vocabulary: React.FC = () => {
           ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
         },
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
+        console.log("Status code:", response.status);
       }
-  
+
       const data = await response.json();
-      console.log("Vocabularies data received:", data);
-  
-      if (data && Array.isArray(data.content)) {
-        setVocabularies(data.content);
+      console.log("Raw data from API:", data);
+
+      // Kiểm tra đúng vị trí chứa danh sách từ vựng
+      if (data && data.data && Array.isArray(data.data.result)) {
+        setVocabularies(data.data.result);
+        console.log("Vocabularies loaded:", data.data.result);
       } else {
-        console.warn("Unexpected vocabulary data format:", data);
         setVocabularies([]);
+        console.warn(
+          "No vocabularies found or data format is incorrect.",
+          data
+        );
       }
     } catch (err) {
       console.error("Error loading vocabularies:", err);
-      setVocabularies([]); // fallback để không bị lỗi render
+      setVocabularies([]);
     }
   };
-  
-  
 
   const startEdit = (vocab: Vocabulary) => {
     setEditingId(vocab.id);
@@ -108,12 +115,11 @@ const Vocabulary: React.FC = () => {
 
   const handleSave = async (id: number) => {
     try {
-      const response = await fetch(config + `admin/vocabularies/${id}`, {
+      const response = await fetch(`${config}admin/vocabularies/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
-          
         },
         body: JSON.stringify(editForm),
       });
@@ -131,9 +137,8 @@ const Vocabulary: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("Bạn có chắc muốn xóa từ này không?")) return;
-
     try {
-      const response = await fetch(config + `admin/vocabularies/${id}`, {
+      const response = await fetch(`${config}admin/vocabularies/${id}`, {
         method: "DELETE",
       });
 
@@ -238,7 +243,9 @@ const Vocabulary: React.FC = () => {
                     <div className="flex flex-wrap items-center gap-2 text-lg font-bold">
                       <span>{vocab.word}</span>
                       {vocab.pronunciation && (
-                        <em className="text-gray-500 ml-2">{vocab.pronunciation}</em>
+                        <em className="text-gray-500 ml-2">
+                          {vocab.pronunciation}
+                        </em>
                       )}
                       {vocab.partOfSpeech && (
                         <span className="italic text-gray-400 ml-3">
@@ -248,7 +255,9 @@ const Vocabulary: React.FC = () => {
                     </div>
 
                     {vocab.definitionEn && (
-                      <p className="text-gray-700 text-sm mt-1">{vocab.definitionEn}</p>
+                      <p className="text-gray-700 text-sm mt-1">
+                        {vocab.definitionEn}
+                      </p>
                     )}
 
                     <p className="mt-1">
@@ -273,6 +282,45 @@ const Vocabulary: React.FC = () => {
                   </>
                 )}
               </div>
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-6 space-x-2">
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                  >
+                    ◀ Trước
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (pageNum) => (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-1 rounded ${
+                          pageNum === currentPage
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-200 hover:bg-gray-300"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                  >
+                    Sau ▶
+                  </button>
+                </div>
+              )}
 
               <div className="flex flex-col gap-2 min-w-[70px]">
                 {editingId === vocab.id ? (
