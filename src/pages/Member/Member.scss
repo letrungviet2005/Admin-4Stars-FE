@@ -1,0 +1,26 @@
+.admin {
+    .member {
+        &-list {
+        .ant-table-thead > tr > th {
+            background-color: #f0f2f5;
+        }
+        .ant-table-tbody > tr > td {
+            background-color: #ffffff;
+        }
+        }
+    
+        &-form {
+        .ant-form-item-label > label {
+            color: #333333;
+        }
+        .ant-input,
+        .ant-select-selector {
+            border-radius: 4px;
+            border-color: #d9d9d9;
+        }
+        }
+    }
+} .user {
+    margin: 10px;
+    padding: auto;
+}

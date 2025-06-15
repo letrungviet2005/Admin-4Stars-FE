@@ -1,3 +1,4 @@
+// User model
 import {
   Table,
   TableBody,
