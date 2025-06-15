@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import config from "../../config/config";
 import { useSearchParams } from "react-router";
+import config from "../../config/config";
 
 interface Vocabulary {
   id: number;
   word: string;
-  definition_en?: string;
-  meaning_vi: string;
-  example_en: string;
-  example_vi: string;
-  part_of_speech?: string;
+  definitionEn: string;
+  meaningVi: string;
+  exampleEn: string;
+  exampleVi: string;
+  partOfSpeech?: string;
   pronunciation?: string;
   image?: string;
   audio?: string;
-  category_id: number;
+  category: {
+    id: number;
+    name: string;
+  };
 }
 
 const Vocabulary: React.FC = () => {
@@ -23,31 +25,70 @@ const Vocabulary: React.FC = () => {
   const [editForm, setEditForm] = useState<Partial<Vocabulary>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [searchParams] = useSearchParams();
-  const category = searchParams.get("category"); 
+  const category = searchParams.get("category");
+  const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
     loadVocabularies();
-  }, [category]); // 👈 Gọi lại khi `category` thay đổi
+  }, [category]);
 
-  const loadVocabularies = () => {
-    const endpoint = category
-      ? `${config}admin/vocabularies/by-category/${category}`
-      : `${config}admin/vocabularies`;
-
-    fetch(endpoint)
-      .then((res) => res.json())
-      .then((data) => setVocabularies(data))
-      .catch((err) => console.error("Error loading vocabularies:", err));
+  const loadVocabularies = async () => {
+    try {
+      const page = 1;
+      const size = 100;
+      const sort = "id,asc";
+      const accessToken = localStorage.getItem("accessToken");
+  
+      const queryParams = new URLSearchParams({
+        page: String(page),
+        size: String(size),
+        sort: sort,
+      });
+  
+      if (category) {
+        queryParams.append("categoryId", category);
+      }
+  
+      const endpoint = `${config}admin/vocabularies?${queryParams.toString()}`;
+      console.log("Fetching vocabularies from:", endpoint);
+  
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log("Vocabularies data received:", data);
+  
+      if (data && Array.isArray(data.content)) {
+        setVocabularies(data.content);
+      } else {
+        console.warn("Unexpected vocabulary data format:", data);
+        setVocabularies([]);
+      }
+    } catch (err) {
+      console.error("Error loading vocabularies:", err);
+      setVocabularies([]); // fallback để không bị lỗi render
+    }
   };
+  
+  
 
   const startEdit = (vocab: Vocabulary) => {
     setEditingId(vocab.id);
     setEditForm({
       word: vocab.word,
-      meaning_vi: vocab.meaning_vi,
-      example_en: vocab.example_en,
-      example_vi: vocab.example_vi,
-      definition_en: vocab.definition_en || "",
+      definitionEn: vocab.definitionEn,
+      meaningVi: vocab.meaningVi,
+      exampleEn: vocab.exampleEn,
+      exampleVi: vocab.exampleVi,
     });
   };
 
@@ -71,13 +112,14 @@ const Vocabulary: React.FC = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+          
         },
         body: JSON.stringify(editForm),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update vocabulary");
-      }
+      if (!response.ok) throw new Error("Failed to update vocabulary");
+
       setEditingId(null);
       setEditForm({});
       loadVocabularies();
@@ -95,9 +137,8 @@ const Vocabulary: React.FC = () => {
         method: "DELETE",
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to delete vocabulary");
-      }
+      if (!response.ok) throw new Error("Failed to delete vocabulary");
+
       loadVocabularies();
     } catch (error) {
       console.error(error);
@@ -116,7 +157,7 @@ const Vocabulary: React.FC = () => {
           <span>📚</span> Vocabulary List
         </h2>
         <button
-          onClick={() => {}} // Bạn có thể thêm logic thêm từ ở đây
+          onClick={() => {}}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm transition"
         >
           + Thêm từ vựng
@@ -160,8 +201,8 @@ const Vocabulary: React.FC = () => {
                       placeholder="Word"
                     />
                     <textarea
-                      name="definition_en"
-                      value={editForm.definition_en || ""}
+                      name="definitionEn"
+                      value={editForm.definitionEn || ""}
                       onChange={handleChange}
                       className="border border-gray-300 rounded px-2 py-1 w-full mb-1"
                       placeholder="English Definition"
@@ -169,24 +210,24 @@ const Vocabulary: React.FC = () => {
                     />
                     <input
                       type="text"
-                      name="meaning_vi"
-                      value={editForm.meaning_vi || ""}
+                      name="meaningVi"
+                      value={editForm.meaningVi || ""}
                       onChange={handleChange}
                       className="border border-gray-300 rounded px-2 py-1 w-full mb-1"
                       placeholder="Meaning (Vietnamese)"
                     />
                     <input
                       type="text"
-                      name="example_en"
-                      value={editForm.example_en || ""}
+                      name="exampleEn"
+                      value={editForm.exampleEn || ""}
                       onChange={handleChange}
                       className="border border-gray-300 rounded px-2 py-1 w-full mb-1"
                       placeholder="Example (English)"
                     />
                     <input
                       type="text"
-                      name="example_vi"
-                      value={editForm.example_vi || ""}
+                      name="exampleVi"
+                      value={editForm.exampleVi || ""}
                       onChange={handleChange}
                       className="border border-gray-300 rounded px-2 py-1 w-full mb-1"
                       placeholder="Example (Vietnamese)"
@@ -199,25 +240,25 @@ const Vocabulary: React.FC = () => {
                       {vocab.pronunciation && (
                         <em className="text-gray-500 ml-2">{vocab.pronunciation}</em>
                       )}
-                      {vocab.part_of_speech && (
+                      {vocab.partOfSpeech && (
                         <span className="italic text-gray-400 ml-3">
-                          ({vocab.part_of_speech})
+                          ({vocab.partOfSpeech})
                         </span>
                       )}
                     </div>
 
-                    {vocab.definition_en && (
-                      <p className="text-gray-700 text-sm mt-1">{vocab.definition_en}</p>
+                    {vocab.definitionEn && (
+                      <p className="text-gray-700 text-sm mt-1">{vocab.definitionEn}</p>
                     )}
 
                     <p className="mt-1">
-                      <strong>VI:</strong> {vocab.meaning_vi}
+                      <strong>VI:</strong> {vocab.meaningVi}
                     </p>
                     <p className="mt-1 text-gray-600 text-sm">
-                      <strong>EN Example:</strong> {vocab.example_en}
+                      <strong>EN Example:</strong> {vocab.exampleEn}
                     </p>
                     <p className="mt-1 text-gray-600 text-sm">
-                      <strong>VI Example:</strong> {vocab.example_vi}
+                      <strong>VI Example:</strong> {vocab.exampleVi}
                     </p>
 
                     {vocab.audio && (
