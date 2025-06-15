@@ -32,7 +32,7 @@ const Categories: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch(`${config}admin/categories?page=${page}&size=${size}&sort&type=GRAMMAR`, {
+      const res = await fetch(`${config}admin/categories?page=${page}&size=${size}&sort&type=VOCABULARY`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`
