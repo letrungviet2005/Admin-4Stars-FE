@@ -4,6 +4,7 @@ import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
+import config from "../../config/config";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
