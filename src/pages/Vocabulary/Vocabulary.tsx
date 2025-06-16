@@ -128,7 +128,7 @@ const Vocabulary: React.FC = () => {
 
       setEditingId(null);
       setEditForm({});
-      loadVocabularies();
+      loadVocabularies(currentPage);
     } catch (error) {
       console.error(error);
       alert("Có lỗi khi cập nhật từ vựng!");
@@ -144,7 +144,7 @@ const Vocabulary: React.FC = () => {
 
       if (!response.ok) throw new Error("Failed to delete vocabulary");
 
-      loadVocabularies();
+      loadVocabularies(currentPage);
     } catch (error) {
       console.error(error);
       alert("Có lỗi khi xóa từ vựng!");
