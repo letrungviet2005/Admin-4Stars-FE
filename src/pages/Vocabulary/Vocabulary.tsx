@@ -29,6 +29,59 @@ const Vocabulary: React.FC = () => {
   const accessToken = localStorage.getItem("accessToken");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [addVocabulary, setAddVocabulary] = useState(false);
+  const [newVocabulary, setNewVocabulary] = useState<
+    Vocabulary & { categoryId: number }
+  >({
+    id: 0,
+    word: "",
+    pronunciation: "",
+    partOfSpeech: "",
+    definitionEn: "",
+    meaningVi: "",
+    exampleEn: "",
+    exampleVi: "",
+    audio: "",
+    image: "",
+    category: { id: 0, name: "" },
+    categoryId: Number(category) || 0,
+  });
+  const handleAddVocabulary = async () => {
+    try {
+      const response = await fetch(`${config}admin/vocabularies`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(newVocabulary),
+      });
+
+      if (!response.ok)
+        throw new Error(
+          "Thêm từ vựng thất bại!" + response.statusText + response.status
+        );
+
+      setNewVocabulary({
+        id: 0,
+        word: "",
+        pronunciation: "",
+        partOfSpeech: "",
+        definitionEn: "",
+        meaningVi: "",
+        exampleEn: "",
+        exampleVi: "",
+        audio: "",
+        image: "",
+        category: { id: 0, name: "" },
+        categoryId: Number(category) || 0,
+      });
+      loadVocabularies(currentPage);
+    } catch (error) {
+      console.error(error);
+      alert("Lỗi khi thêm từ vựng!");
+    }
+  };
 
   useEffect(() => {
     loadVocabularies(currentPage);
@@ -88,7 +141,7 @@ const Vocabulary: React.FC = () => {
       if (data && data.data && Array.isArray(data.data.result)) {
         setVocabularies(data.data.result);
         // Lấy tổng số trang từ phản hồi (nếu có)
-        setTotalPages(data.data.totalPages || 1);
+        setTotalPages(data.data.meta.total);
       } else {
         setVocabularies([]);
         setTotalPages(1);
@@ -166,6 +219,9 @@ const Vocabulary: React.FC = () => {
       alert("Có lỗi khi xóa từ vựng!");
     }
   };
+  const ToggleaddVocabulary = () => {
+    setAddVocabulary(!addVocabulary);
+  };
 
   const filteredVocabularies = vocabularies.filter((vocab) =>
     vocab.word.toLowerCase().includes(searchQuery.toLowerCase())
@@ -173,18 +229,138 @@ const Vocabulary: React.FC = () => {
 
   return (
     <div className="grid-cols-1 md:grid-cols-2">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-3xl font-semibold flex items-center gap-2">
-          <span>📚</span> Vocabulary List
-        </h2>
+      <div className="bg-gray-100 p-4 rounded-md shadow mb-6">
         <button
-          onClick={() => handleAddVocalabulary()}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm transition"
+          className="text-lg font-semibold mb-3"
+          onClick={() => ToggleaddVocabulary()}
         >
-          + Thêm từ vựng
+          ➕ Thêm từ vựng mới
         </button>
-      </div>
+        {addVocabulary && (
+          <div className="mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input
+                type="text"
+                placeholder="Word"
+                value={newVocabulary.word}
+                onChange={(e) =>
+                  setNewVocabulary({ ...newVocabulary, word: e.target.value })
+                }
+                className="border px-3 py-2 rounded"
+              />
+              <input
+                type="text"
+                placeholder="Pronunciation"
+                value={newVocabulary.pronunciation}
+                onChange={(e) =>
+                  setNewVocabulary({
+                    ...newVocabulary,
+                    pronunciation: e.target.value,
+                  })
+                }
+                className="border px-3 py-2 rounded"
+              />
+              <input
+                type="text"
+                placeholder="Part of Speech"
+                value={newVocabulary.partOfSpeech}
+                onChange={(e) =>
+                  setNewVocabulary({
+                    ...newVocabulary,
+                    partOfSpeech: e.target.value,
+                  })
+                }
+                className="border px-3 py-2 rounded"
+              />
+              <input
+                type="text"
+                placeholder="Definition (English)"
+                value={newVocabulary.definitionEn}
+                onChange={(e) =>
+                  setNewVocabulary({
+                    ...newVocabulary,
+                    definitionEn: e.target.value,
+                  })
+                }
+                className="border px-3 py-2 rounded"
+              />
+              <input
+                type="text"
+                placeholder="Meaning (Vietnamese)"
+                value={newVocabulary.meaningVi}
+                onChange={(e) =>
+                  setNewVocabulary({
+                    ...newVocabulary,
+                    meaningVi: e.target.value,
+                  })
+                }
+                className="border px-3 py-2 rounded"
+              />
+              <input
+                type="text"
+                placeholder="Example (English)"
+                value={newVocabulary.exampleEn}
+                onChange={(e) =>
+                  setNewVocabulary({
+                    ...newVocabulary,
+                    exampleEn: e.target.value,
+                  })
+                }
+                className="border px-3 py-2 rounded"
+              />
+              <input
+                type="text"
+                placeholder="Example (Vietnamese)"
+                value={newVocabulary.exampleVi}
+                onChange={(e) =>
+                  setNewVocabulary({
+                    ...newVocabulary,
+                    exampleVi: e.target.value,
+                  })
+                }
+                className="border px-3 py-2 rounded"
+              />
+              <input
+                type="text"
+                placeholder="Audio URL"
+                value={newVocabulary.audio}
+                onChange={(e) =>
+                  setNewVocabulary({ ...newVocabulary, audio: e.target.value })
+                }
+                className="border px-3 py-2 rounded"
+              />
+              <input
+                type="text"
+                placeholder="Image URL"
+                value={newVocabulary.image}
+                onChange={(e) =>
+                  setNewVocabulary({ ...newVocabulary, image: e.target.value })
+                }
+                className="border px-3 py-2 rounded"
+              />
+              <input
+                type="number"
+                placeholder="Category ID"
+                value={newVocabulary.categoryId}
+                onChange={(e) =>
+                  setNewVocabulary({
+                    ...newVocabulary,
+                    categoryId: parseInt(e.target.value),
+                  })
+                }
+                className="border px-3 py-2 rounded"
+              />
+            </div>
 
+            <button
+              onClick={handleAddVocabulary}
+              className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition"
+            >
+              ✅ Thêm từ
+            </button>
+          </div>
+        )}
+      </div>
       <input
         type="text"
         placeholder="🔍 Tìm từ vựng..."
