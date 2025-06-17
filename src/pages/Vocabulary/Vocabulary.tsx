@@ -13,10 +13,7 @@ interface Vocabulary {
   pronunciation?: string;
   image?: string;
   audio?: string;
-  category: {
-    id: number;
-    name: string;
-  };
+  categoryId: number;
 }
 
 const Vocabulary: React.FC = () => {
@@ -43,25 +40,61 @@ const Vocabulary: React.FC = () => {
     exampleVi: "",
     audio: "",
     image: "",
-    category: { id: 0, name: "" },
     categoryId: Number(category) || 0,
   });
-  const handleAddVocabulary = async () => {
+
+  useEffect(() => {
+    loadVocabularies(currentPage);
+  }, [category, currentPage]);
+
+  const handleAddVocalabulary = async () => {
     try {
+      // Kiểm tra các trường bắt buộc
+      if (
+        !newVocabulary.word ||
+        !newVocabulary.meaningVi ||
+        !newVocabulary.categoryId
+      ) {
+        alert(
+          "Vui lòng điền các trường bắt buộc: từ, nghĩa tiếng Việt và danh mục"
+        );
+        return;
+      }
+
+      // Chuẩn bị dữ liệu gửi đi
+      const payload = {
+        word: newVocabulary.word,
+        pronunciation: newVocabulary.pronunciation || null,
+        partOfSpeech: newVocabulary.partOfSpeech || null,
+        definitionEn: newVocabulary.definitionEn || null,
+        meaningVi: newVocabulary.meaningVi,
+        exampleEn: newVocabulary.exampleEn || null,
+        exampleVi: newVocabulary.exampleVi || null,
+        audio: newVocabulary.audio || null,
+        image: newVocabulary.image || null,
+        categoryId: newVocabulary.categoryId,
+      };
+
+      console.log("Payload:", payload); // Kiểm tra dữ liệu trước khi gửi
+
       const response = await fetch(`${config}admin/vocabularies`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`, // Đảm bảo có token
         },
-        body: JSON.stringify(newVocabulary),
+        body: JSON.stringify(payload),
       });
 
-      if (!response.ok)
-        throw new Error(
-          "Thêm từ vựng thất bại!" + response.statusText + response.status
-        );
+      console.log("Response status:", response.status); // Kiểm tra mã trạng thái
 
+      if (!response.ok) {
+        const errorData = await response.json(); // Lấy thông báo lỗi từ server
+        console.error("Error details:", errorData);
+        throw new Error(errorData.message || "Failed to add vocabulary");
+      }
+
+      // Reset form sau khi thành công
       setNewVocabulary({
         id: 0,
         word: "",
@@ -73,37 +106,15 @@ const Vocabulary: React.FC = () => {
         exampleVi: "",
         audio: "",
         image: "",
-        category: { id: 0, name: "" },
         categoryId: Number(category) || 0,
       });
-      loadVocabularies(currentPage);
+      setAddVocabulary(false);
+      loadVocabularies(1); // Load lại trang đầu tiên
+
+      alert("Thêm từ vựng thành công!");
     } catch (error) {
-      console.error(error);
-      alert("Lỗi khi thêm từ vựng!");
-    }
-  };
-
-  useEffect(() => {
-    loadVocabularies(currentPage);
-  }, [category, currentPage]);
-
-  const handleAddVocalabulary = async () => {
-    try {
-      const response = await fetch(`${config}admin/vocabularies`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(editForm),
-      });
-
-      if (!response.ok) throw new Error("Failed to add vocabulary");
-
-      setEditForm({});
-      loadVocabularies(currentPage);
-    } catch (error) {
-      console.error(error);
+      console.error("Error:", error);
+      alert(`Lỗi khi thêm từ vựng: ${error.message}`);
     }
   };
 
@@ -190,7 +201,7 @@ const Vocabulary: React.FC = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify(editForm),
+        body: JSON.stringify(newVocabulary),
       });
 
       if (!response.ok) throw new Error("Failed to update vocabulary");
@@ -353,7 +364,7 @@ const Vocabulary: React.FC = () => {
             </div>
 
             <button
-              onClick={handleAddVocabulary}
+              onClick={handleAddVocalabulary}
               className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition"
             >
               ✅ Thêm từ
