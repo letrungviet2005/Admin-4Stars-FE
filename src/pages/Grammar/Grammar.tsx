@@ -17,8 +17,6 @@ interface Grammar {
 const Grammars: React.FC = () => {
   const [grammars, setGrammars] = useState<Grammar[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const navigate = useNavigate();
-  const token = localStorage.getItem("token");
   const [editInputs, setEditInputs] = useState({
     name: "",
     description: "",
@@ -30,20 +28,45 @@ const Grammars: React.FC = () => {
     description: "",
     type: "",
   });
-  //http://localhost:8080/api/v1/admin/grammars?page=1&size=2&sort=id,asc&categoryId=1&name=past
-  const handleAddGrammar = async () => {
+
+  const accessToken = localStorage.getItem("accessToken");
+  const navigate = useNavigate();
+
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${accessToken}`,
+  };
+
+  const fetchGrammars = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v1/admin/grammars?page=1&size=2&sort=id,asc&categoryId=1&name=past`,
+        `${config}admin/grammars?page=1&size=10&sort=id,asc`,
         {
-          method: "POST",
+          method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify(newGrammar),
         }
       );
+      if (!response.ok) throw new Error("Failed to fetch grammars");
+
+      const data = await response.json();
+      // Tùy response, nếu data.data là mảng thì dùng dòng dưới
+      setGrammars(data.data.result);
+    } catch (error) {
+      console.error("Error loading grammar categories:", error);
+    }
+  };
+
+  const handleAddGrammar = async () => {
+    try {
+      const response = await fetch(`${config}admin/grammars`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(newGrammar),
+      });
+
       if (!response.ok) throw new Error("Failed to add grammar");
 
       const created = await response.json();
@@ -73,14 +96,13 @@ const Grammars: React.FC = () => {
 
   const handleSave = async (id: number) => {
     try {
-      const response = await fetch(`${config}admin/grammar-categories/${id}`, {
+      const response = await fetch(`${config}admin/grammars/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(editInputs),
       });
 
-      if (!response.ok)
-        throw new Error(`Failed to edit grammar with ID: ${id}`);
+      if (!response.ok) throw new Error("Failed to update grammar");
 
       const updated = await response.json();
       setGrammars((prev) =>
@@ -94,23 +116,21 @@ const Grammars: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`${config}admin/grammar-categories/${id}`, {
+      const response = await fetch(`${config}admin/grammars/${id}`, {
         method: "DELETE",
+        headers,
       });
 
-      if (!response.ok)
-        throw new Error(`Failed to delete grammar with ID: ${id}`);
+      if (!response.ok) throw new Error("Failed to delete grammar");
 
       setGrammars((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
       console.error(error);
     }
   };
+
   useEffect(() => {
-    fetch(config + "admin/grammar-categories")
-      .then((res) => res.json())
-      .then((data) => setGrammars(data.data))
-      .catch((err) => console.error("Error loading grammar categories:", err));
+    fetchGrammars();
   }, []);
 
   return (
@@ -142,7 +162,10 @@ const Grammars: React.FC = () => {
                   name="name"
                   value={newGrammar.name}
                   onChange={(e) =>
-                    setNewGrammar((prev) => ({ ...prev, name: e.target.value }))
+                    setNewGrammar((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
                   }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 mt-1"
                   placeholder="Nhập tên chủ đề"
@@ -156,7 +179,10 @@ const Grammars: React.FC = () => {
                   name="type"
                   value={newGrammar.type}
                   onChange={(e) =>
-                    setNewGrammar((prev) => ({ ...prev, type: e.target.value }))
+                    setNewGrammar((prev) => ({
+                      ...prev,
+                      type: e.target.value,
+                    }))
                   }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 mt-1"
                   placeholder="Ví dụ: ngữ pháp cơ bản, nâng cao..."
@@ -197,84 +223,81 @@ const Grammars: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {grammars &&
-          grammars.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white shadow-md rounded-xl p-4 border border-gray-200 hover:shadow-lg transition relative"
-            >
-              <div className="absolute top-2 right-2 flex gap-2">
-                {editingId === item.id ? (
-                  <>
-                    <button
-                      className="text-green-500"
-                      onClick={() => handleSave(item.id)}
-                    >
-                      ✅
-                    </button>
-                    <button
-                      className="text-gray-500"
-                      onClick={() => setEditingId(null)}
-                    >
-                      ❌
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      className="text-blue-500"
-                      onClick={() => handleEditClick(item)}
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      className="text-red-500"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      🗑️
-                    </button>
-                  </>
-                )}
-              </div>
-
+        {grammars.map((item) => (
+          <div
+            key={item.id}
+            className="bg-white shadow-md rounded-xl p-4 border border-gray-200 hover:shadow-lg transition relative"
+          >
+            <div className="absolute top-2 right-2 flex gap-2">
               {editingId === item.id ? (
                 <>
-                  <input
-                    type="text"
-                    name="name"
-                    value={editInputs.name}
-                    onChange={handleInputChange}
-                    className="border rounded px-2 py-1 w-full mb-2 mt-5"
-                  />
-                  <textarea
-                    name="description"
-                    value={editInputs.description}
-                    onChange={handleInputChange}
-                    className="border rounded px-2 py-1 w-full mb-2"
-                  />
-                  <input
-                    type="text"
-                    name="type"
-                    value={editInputs.type}
-                    onChange={handleInputChange}
-                    className="border rounded px-2 py-1 w-full"
-                  />
+                  <button
+                    className="text-green-500"
+                    onClick={() => handleSave(item.id)}
+                  >
+                    ✅
+                  </button>
+                  <button
+                    className="text-gray-500"
+                    onClick={() => setEditingId(null)}
+                  >
+                    ❌
+                  </button>
                 </>
               ) : (
                 <>
-                  <h3 className="text-lg font-semibold text-blue-600 mb-2 mt-5">
-                    {item.name}
-                  </h3>
-                  {item.description && (
-                    <p className="text-sm text-gray-600">{item.description}</p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-3">
-                    Type: {item.type}
-                  </p>
+                  <button
+                    className="text-blue-500"
+                    onClick={() => handleEditClick(item)}
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    className="text-red-500"
+                    onClick={() => handleDelete(item.id)}
+                  >
+                    🗑️
+                  </button>
                 </>
               )}
             </div>
-          ))}
+
+            {editingId === item.id ? (
+              <>
+                <input
+                  type="text"
+                  name="name"
+                  value={editInputs.name}
+                  onChange={handleInputChange}
+                  className="border rounded px-2 py-1 w-full mb-2 mt-5"
+                />
+                <textarea
+                  name="description"
+                  value={editInputs.description}
+                  onChange={handleInputChange}
+                  className="border rounded px-2 py-1 w-full mb-2"
+                />
+                <input
+                  type="text"
+                  name="type"
+                  value={editInputs.type}
+                  onChange={handleInputChange}
+                  className="border rounded px-2 py-1 w-full"
+                />
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-semibold text-blue-600 mb-2 mt-5">
+                  {item.name}
+                </h3>
+                {item.description && (
+                  <p className="text-sm text-gray-600">{item.description}</p>
+                )}
+                <p className="text-xs text-gray-500 mt-3">Type: {item.type}</p>
+              </>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
