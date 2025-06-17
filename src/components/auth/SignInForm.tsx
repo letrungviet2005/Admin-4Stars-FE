@@ -6,7 +6,7 @@ import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 import config from "../../config/config";
-import { useNavigate } from 'react-router';
+import { useNavigate } from "react-router";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +24,7 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(config +"auth/login", {
+      const response = await fetch(config + "auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -40,7 +40,6 @@ export default function SignInForm() {
         localStorage.setItem("accessToken", result.data.accessToken);
         setSuccess("Login successful!");
         navigate("/"); // Redirect to dashboard after successful login
-        
       } else {
         setError(result.message || "Login failed");
       }
@@ -90,7 +89,9 @@ export default function SignInForm() {
           <form onSubmit={handleSubmit}>
             <div className="space-y-6">
               <div>
-                <Label>Email <span className="text-error-500">*</span></Label>
+                <Label>
+                  Email <span className="text-error-500">*</span>
+                </Label>
                 <Input
                   placeholder="info@gmail.com"
                   value={email}
@@ -98,7 +99,9 @@ export default function SignInForm() {
                 />
               </div>
               <div>
-                <Label>Password <span className="text-error-500">*</span></Label>
+                <Label>
+                  Password <span className="text-error-500">*</span>
+                </Label>
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
@@ -143,18 +146,6 @@ export default function SignInForm() {
               </div>
             </div>
           </form>
-
-          <div className="mt-5">
-            <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-              Don&apos;t have an account?{" "}
-              <Link
-                to="/signup"
-                className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-              >
-                Sign Up
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
     </div>

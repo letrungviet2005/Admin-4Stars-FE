@@ -17,6 +17,8 @@ interface Grammar {
 const Grammars: React.FC = () => {
   const [grammars, setGrammars] = useState<Grammar[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(6);
   const [editInputs, setEditInputs] = useState({
     name: "",
     description: "",
@@ -40,7 +42,7 @@ const Grammars: React.FC = () => {
   const fetchGrammars = async () => {
     try {
       const response = await fetch(
-        `${config}admin/grammars?page=1&size=10&sort=id,asc`,
+        `${config}admin/grammars?page=${page}&size=${size}&sort=id,asc`,
         {
           method: "GET",
           headers: {
@@ -131,7 +133,7 @@ const Grammars: React.FC = () => {
 
   useEffect(() => {
     fetchGrammars();
-  }, []);
+  }, [page, size]);
 
   return (
     <div className="p-6 w-full max-w-6xl mx-auto">
@@ -298,6 +300,35 @@ const Grammars: React.FC = () => {
             )}
           </div>
         ))}
+      </div>
+      <div className="flex justify-center items-center gap-3 mt-6">
+        <button
+          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          disabled={page === 1}
+          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+        >
+          ⬅️ Trang trước
+        </button>
+
+        <span className="text-sm font-medium">Trang {page}</span>
+
+        <button
+          onClick={() => setPage((prev) => prev + 1)}
+          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded"
+        >
+          Trang sau ➡️
+        </button>
+
+        <select
+          value={size}
+          onChange={(e) => setSize(Number(e.target.value))}
+          className="ml-4 border rounded px-2 py-1 text-sm"
+        >
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+        </select>
       </div>
     </div>
   );
