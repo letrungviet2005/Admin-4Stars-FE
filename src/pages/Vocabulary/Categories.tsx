@@ -37,7 +37,7 @@ const Categories: React.FC = () => {
 
   // Phân trang
   const [page, setPage] = useState(1);
-  const size = 5;
+  const size = 6;
   const [totalPages, setTotalPages] = useState(1);
 
   const fetchCategories = async () => {

@@ -34,9 +34,25 @@ const Vocabulary: React.FC = () => {
     loadVocabularies(currentPage);
   }, [category, currentPage]);
 
-  useEffect(() => {
-    loadVocabularies();
-  }, [category]);
+  const handleAddVocalabulary = async () => {
+    try {
+      const response = await fetch(`${config}admin/vocabularies`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(editForm),
+      });
+
+      if (!response.ok) throw new Error("Failed to add vocabulary");
+
+      setEditForm({});
+      loadVocabularies(currentPage);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const loadVocabularies = async (page: number) => {
     try {
@@ -63,20 +79,19 @@ const Vocabulary: React.FC = () => {
         },
       });
 
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
-        console.log("Status code:", response.status);
-      }
 
       const data = await response.json();
       console.log("Raw data from API:", data);
 
-      // Kiểm tra đúng vị trí chứa danh sách từ vựng
       if (data && data.data && Array.isArray(data.data.result)) {
         setVocabularies(data.data.result);
-        console.log("Vocabularies loaded:", data.data.result);
+        // Lấy tổng số trang từ phản hồi (nếu có)
+        setTotalPages(data.data.totalPages || 1);
       } else {
         setVocabularies([]);
+        setTotalPages(1);
         console.warn(
           "No vocabularies found or data format is incorrect.",
           data
@@ -85,6 +100,7 @@ const Vocabulary: React.FC = () => {
     } catch (err) {
       console.error("Error loading vocabularies:", err);
       setVocabularies([]);
+      setTotalPages(1);
     }
   };
 
@@ -162,7 +178,7 @@ const Vocabulary: React.FC = () => {
           <span>📚</span> Vocabulary List
         </h2>
         <button
-          onClick={() => {}}
+          onClick={() => handleAddVocalabulary()}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm transition"
         >
           + Thêm từ vựng
@@ -282,45 +298,6 @@ const Vocabulary: React.FC = () => {
                   </>
                 )}
               </div>
-              {totalPages > 1 && (
-                <div className="flex justify-center mt-6 space-x-2">
-                  <button
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    disabled={currentPage === 1}
-                    className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-                  >
-                    ◀ Trước
-                  </button>
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (pageNum) => (
-                      <button
-                        key={pageNum}
-                        onClick={() => setCurrentPage(pageNum)}
-                        className={`px-3 py-1 rounded ${
-                          pageNum === currentPage
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-200 hover:bg-gray-300"
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    )
-                  )}
-
-                  <button
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                    }
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-                  >
-                    Sau ▶
-                  </button>
-                </div>
-              )}
 
               <div className="flex flex-col gap-2 min-w-[70px]">
                 {editingId === vocab.id ? (
@@ -358,6 +335,44 @@ const Vocabulary: React.FC = () => {
             </li>
           ))}
         </ul>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 space-x-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+          >
+            ◀ Trước
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+            (pageNum) => (
+              <button
+                key={pageNum}
+                onClick={() => setCurrentPage(pageNum)}
+                className={`px-3 py-1 rounded ${
+                  pageNum === currentPage
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 hover:bg-gray-300"
+                }`}
+              >
+                {pageNum}
+              </button>
+            )
+          )}
+
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+          >
+            Sau ▶
+          </button>
+        </div>
       )}
     </div>
   );
