@@ -18,6 +18,7 @@ const Grammars: React.FC = () => {
   const [grammars, setGrammars] = useState<Grammar[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
   const [editInputs, setEditInputs] = useState({
     name: "",
     description: "",
@@ -29,15 +30,20 @@ const Grammars: React.FC = () => {
     description: "",
     type: "",
   });
-
+  //http://localhost:8080/api/v1/admin/grammars?page=1&size=2&sort=id,asc&categoryId=1&name=past
   const handleAddGrammar = async () => {
     try {
-      const response = await fetch(`${config}admin/grammar-categories`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newGrammar),
-      });
-
+      const response = await fetch(
+        `http://localhost:8080/api/v1/admin/grammars?page=1&size=2&sort=id,asc&categoryId=1&name=past`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(newGrammar),
+        }
+      );
       if (!response.ok) throw new Error("Failed to add grammar");
 
       const created = await response.json();
@@ -100,11 +106,10 @@ const Grammars: React.FC = () => {
       console.error(error);
     }
   };
-
   useEffect(() => {
     fetch(config + "admin/grammar-categories")
       .then((res) => res.json())
-      .then((data) => setGrammars(data))
+      .then((data) => setGrammars(data.data))
       .catch((err) => console.error("Error loading grammar categories:", err));
   }, []);
 
@@ -192,81 +197,84 @@ const Grammars: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {grammars.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white shadow-md rounded-xl p-4 border border-gray-200 hover:shadow-lg transition relative"
-          >
-            <div className="absolute top-2 right-2 flex gap-2">
+        {grammars &&
+          grammars.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white shadow-md rounded-xl p-4 border border-gray-200 hover:shadow-lg transition relative"
+            >
+              <div className="absolute top-2 right-2 flex gap-2">
+                {editingId === item.id ? (
+                  <>
+                    <button
+                      className="text-green-500"
+                      onClick={() => handleSave(item.id)}
+                    >
+                      ✅
+                    </button>
+                    <button
+                      className="text-gray-500"
+                      onClick={() => setEditingId(null)}
+                    >
+                      ❌
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className="text-blue-500"
+                      onClick={() => handleEditClick(item)}
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      className="text-red-500"
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      🗑️
+                    </button>
+                  </>
+                )}
+              </div>
+
               {editingId === item.id ? (
                 <>
-                  <button
-                    className="text-green-500"
-                    onClick={() => handleSave(item.id)}
-                  >
-                    ✅
-                  </button>
-                  <button
-                    className="text-gray-500"
-                    onClick={() => setEditingId(null)}
-                  >
-                    ❌
-                  </button>
+                  <input
+                    type="text"
+                    name="name"
+                    value={editInputs.name}
+                    onChange={handleInputChange}
+                    className="border rounded px-2 py-1 w-full mb-2 mt-5"
+                  />
+                  <textarea
+                    name="description"
+                    value={editInputs.description}
+                    onChange={handleInputChange}
+                    className="border rounded px-2 py-1 w-full mb-2"
+                  />
+                  <input
+                    type="text"
+                    name="type"
+                    value={editInputs.type}
+                    onChange={handleInputChange}
+                    className="border rounded px-2 py-1 w-full"
+                  />
                 </>
               ) : (
                 <>
-                  <button
-                    className="text-blue-500"
-                    onClick={() => handleEditClick(item)}
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    className="text-red-500"
-                    onClick={() => handleDelete(item.id)}
-                  >
-                    🗑️
-                  </button>
+                  <h3 className="text-lg font-semibold text-blue-600 mb-2 mt-5">
+                    {item.name}
+                  </h3>
+                  {item.description && (
+                    <p className="text-sm text-gray-600">{item.description}</p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-3">
+                    Type: {item.type}
+                  </p>
                 </>
               )}
             </div>
-
-            {editingId === item.id ? (
-              <>
-                <input
-                  type="text"
-                  name="name"
-                  value={editInputs.name}
-                  onChange={handleInputChange}
-                  className="border rounded px-2 py-1 w-full mb-2 mt-5"
-                />
-                <textarea
-                  name="description"
-                  value={editInputs.description}
-                  onChange={handleInputChange}
-                  className="border rounded px-2 py-1 w-full mb-2"
-                />
-                <input
-                  type="text"
-                  name="type"
-                  value={editInputs.type}
-                  onChange={handleInputChange}
-                  className="border rounded px-2 py-1 w-full"
-                />
-              </>
-            ) : (
-              <>
-                <h3 className="text-lg font-semibold text-blue-600 mb-2 mt-5">
-                  {item.name}
-                </h3>
-                {item.description && (
-                  <p className="text-sm text-gray-600">{item.description}</p>
-                )}
-                <p className="text-xs text-gray-500 mt-3">Type: {item.type}</p>
-              </>
-            )}
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   );
