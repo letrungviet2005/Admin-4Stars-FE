@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import config from "../../config/config";
 
 interface ArticleItem {
   id: number;
@@ -12,11 +13,21 @@ interface ArticleItem {
 
 export default function Article() {
   const [articles, setArticles] = useState<ArticleItem[]>([]);
+  const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const res = await fetch("https://your-api-url.com/articles");
+        const res = await fetch(
+          config + "admin/articles?page=1&size=2&sort=id,asc",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
         const json = await res.json();
         setArticles(json.data.result);
       } catch (err) {
