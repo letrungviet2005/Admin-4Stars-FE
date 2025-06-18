@@ -6,8 +6,8 @@ interface Grammar {
   id: number;
   name: string;
   description?: string;
+  content?: string;
   order_index?: number;
-  type?: string;
   created_at?: string;
   updated_at?: string;
   created_by?: string;
@@ -22,13 +22,13 @@ const Grammars: React.FC = () => {
   const [editInputs, setEditInputs] = useState({
     name: "",
     description: "",
-    type: "",
+    content: "",
   });
   const [showAddForm, setShowAddForm] = useState(false);
   const [newGrammar, setNewGrammar] = useState({
     name: "",
     description: "",
-    type: "",
+    content: "",
   });
 
   const accessToken = localStorage.getItem("accessToken");
@@ -43,18 +43,11 @@ const Grammars: React.FC = () => {
     try {
       const response = await fetch(
         `${config}admin/grammars?page=${page}&size=${size}&sort=id,asc`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
+        { method: "GET", headers }
       );
       if (!response.ok) throw new Error("Failed to fetch grammars");
 
       const data = await response.json();
-      // Tùy response, nếu data.data là mảng thì dùng dòng dưới
       setGrammars(data.data.result);
     } catch (error) {
       console.error("Error loading grammar categories:", error);
@@ -74,7 +67,7 @@ const Grammars: React.FC = () => {
       const created = await response.json();
       setGrammars((prev) => [...prev, created]);
       setShowAddForm(false);
-      setNewGrammar({ name: "", description: "", type: "" });
+      setNewGrammar({ name: "", description: "", content: "" });
     } catch (err) {
       console.error(err);
     }
@@ -85,7 +78,7 @@ const Grammars: React.FC = () => {
     setEditInputs({
       name: item.name,
       description: item.description || "",
-      type: item.type || "",
+      content: item.content || "",
     });
   };
 
@@ -175,15 +168,15 @@ const Grammars: React.FC = () => {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Loại
+                  Nội dung
                 </label>
                 <input
-                  name="type"
-                  value={newGrammar.type}
+                  name="content"
+                  value={newGrammar.content}
                   onChange={(e) =>
                     setNewGrammar((prev) => ({
                       ...prev,
-                      type: e.target.value,
+                      content: e.target.value,
                     }))
                   }
                   className="w-full border border-gray-300 rounded-md px-3 py-2 mt-1"
@@ -222,6 +215,13 @@ const Grammars: React.FC = () => {
             </div>
           </div>
         )}
+      </div>
+      <div>
+        <input
+          type="text"
+          placeholder="🔍 Tìm ngữ pháp..."
+          className="mb-6 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -281,8 +281,8 @@ const Grammars: React.FC = () => {
                 />
                 <input
                   type="text"
-                  name="type"
-                  value={editInputs.type}
+                  name="content"
+                  value={editInputs.content}
                   onChange={handleInputChange}
                   className="border rounded px-2 py-1 w-full"
                 />
@@ -295,12 +295,15 @@ const Grammars: React.FC = () => {
                 {item.description && (
                   <p className="text-sm text-gray-600">{item.description}</p>
                 )}
-                <p className="text-xs text-gray-500 mt-3">Type: {item.type}</p>
+                <p className="text-xs text-gray-500 mt-3">
+                  Nội dung: {item.content}
+                </p>
               </>
             )}
           </div>
         ))}
       </div>
+
       <div className="flex justify-center items-center gap-3 mt-6">
         <button
           onClick={() => setPage((prev) => Math.max(prev - 1, 1))}

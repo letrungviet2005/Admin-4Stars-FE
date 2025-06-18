@@ -1,40 +1,70 @@
-import PageBreadcrumb from "../../components/common/PageBreadCrumb";
-import DefaultInputs from "../../components/form/form-elements/DefaultInputs";
-import InputGroup from "../../components/form/form-elements/InputGroup";
-import DropzoneComponent from "../../components/form/form-elements/DropZone";
-import CheckboxComponents from "../../components/form/form-elements/CheckboxComponents";
-import RadioButtons from "../../components/form/form-elements/RadioButtons";
-import ToggleSwitch from "../../components/form/form-elements/ToggleSwitch";
-import FileInputExample from "../../components/form/form-elements/FileInputExample";
-import SelectInputs from "../../components/form/form-elements/SelectInputs";
-import TextAreaInput from "../../components/form/form-elements/TextAreaInput";
-import InputStates from "../../components/form/form-elements/InputStates";
-import PageMeta from "../../components/common/PageMeta";
+import React, { useEffect, useState } from "react";
+
+interface ArticleItem {
+  id: number;
+  title: string;
+  content: string;
+  image: string;
+  audio: string;
+  category: { id: number; name: string };
+  createdAt: string;
+}
 
 export default function Article() {
+  const [articles, setArticles] = useState<ArticleItem[]>([]);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const res = await fetch("https://your-api-url.com/articles");
+        const json = await res.json();
+        setArticles(json.data.result);
+      } catch (err) {
+        console.error("Failed to fetch articles:", err);
+      }
+    };
+
+    fetchArticles();
+  }, []);
+
   return (
-    <div>
-      <PageMeta
-        title="React.js Form Elements Dashboard | TailAdmin - React.js Admin Dashboard Template"
-        description="This is React.js Form Elements  Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
-      />
-      <PageBreadcrumb pageTitle="From Elements" />
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <div className="space-y-6">
-          <DefaultInputs />
-          <SelectInputs />
-          <TextAreaInput />
-          <InputStates />
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">📰 Danh sách bài viết</h1>
+      {articles.map((article) => (
+        <div
+          key={article.id}
+          className="mb-10 p-4 border border-gray-200 rounded-xl shadow"
+        >
+          <h2 className="text-xl font-semibold text-blue-700 mb-2">
+            {article.title}
+          </h2>
+
+          {article.image && (
+            <img
+              src={article.image}
+              alt={article.title}
+              className="w-full max-h-60 object-cover rounded mb-3"
+            />
+          )}
+
+          <div
+            className="text-gray-700 text-sm leading-relaxed mb-3"
+            dangerouslySetInnerHTML={{ __html: article.content }}
+          />
+
+          {article.audio && (
+            <audio controls className="mb-3">
+              <source src={article.audio} type="audio/mpeg" />
+              Trình duyệt của bạn không hỗ trợ audio.
+            </audio>
+          )}
+
+          <div className="text-xs text-gray-500">
+            <p>📂 Danh mục: {article.category.name}</p>
+            <p>🕒 Ngày đăng: {new Date(article.createdAt).toLocaleString()}</p>
+          </div>
         </div>
-        <div className="space-y-6">
-          <InputGroup />
-          <FileInputExample />
-          <CheckboxComponents />
-          <RadioButtons />
-          <ToggleSwitch />
-          <DropzoneComponent />
-        </div>
-      </div>
+      ))}
     </div>
   );
 }
