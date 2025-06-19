@@ -19,6 +19,7 @@ import Vocabulary from "./pages/Vocabulary/Vocabulary";
 import Article from "./pages/ArticleAndVideos/Article";
 import Categories from "./pages/Vocabulary/Categories";
 import Admin from "./pages/Admin/Admin";
+import Video from "./pages/ArticleAndVideos/Video";
 
 export default function App() {
   return (
@@ -49,7 +50,7 @@ export default function App() {
             <Route path="/badge" element={<Badges />} />
             <Route path="/buttons" element={<Buttons />} />
             <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
+            <Route path="/videos" element={<Video />} />
 
             {/* Charts */}
             <Route path="/line-chart" element={<LineChart />} />
