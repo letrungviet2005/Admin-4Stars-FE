@@ -20,6 +20,7 @@ import Article from "./pages/ArticleAndVideos/Article";
 import Categories from "./pages/Vocabulary/Categories";
 import Admin from "./pages/Admin/Admin";
 import Video from "./pages/ArticleAndVideos/Video";
+import "../src/authentication/authentication";
 
 export default function App() {
   return (
