@@ -39,7 +39,7 @@ const Video: React.FC = () => {
         );
         const data = await response.json();
         setVideos(data.data.result);
-        setTotalPages(data.data.meta.pages); // lấy tổng số trang từ server
+        setTotalPages(data.data.meta.pages);
       } catch (error) {
         console.error("Lỗi khi tải video:", error);
       }

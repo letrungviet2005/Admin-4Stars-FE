@@ -321,17 +321,6 @@ const Grammars: React.FC = () => {
         >
           Trang sau ➡️
         </button>
-
-        <select
-          value={size}
-          onChange={(e) => setSize(Number(e.target.value))}
-          className="ml-4 border rounded px-2 py-1 text-sm"
-        >
-          <option value={5}>5</option>
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-        </select>
       </div>
     </div>
   );
