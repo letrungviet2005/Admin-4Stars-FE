@@ -34,7 +34,10 @@ const navItems: NavItem[] = [
   {
     icon: <CalenderIcon />,
     name: "Vocabulary",
-    subItems: [{ name: "Categories", path: "/categories", pro: false },{name: "Vocabulary", path: "/vocabulary", pro: false}],
+    subItems: [
+      { name: "Categories", path: "/categories", pro: false },
+      { name: "Vocabulary", path: "/vocabulary", pro: false },
+    ],
   },
   {
     icon: <UserCircleIcon />,
@@ -44,9 +47,9 @@ const navItems: NavItem[] = [
   {
     name: "Article & Videos",
     icon: <ListIcon />,
-    subItems: [{ name: "Article", path: "/article", pro: false },
-      { name: "Videos", path: "/videos", pro: false }
-
+    subItems: [
+      { name: "Article", path: "/article", pro: false },
+      { name: "Videos", path: "/videos", pro: false },
     ],
   },
   {
@@ -305,35 +308,7 @@ const AppSidebar: React.FC = () => {
         className={`py-8 flex ${
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
-      >
-        <Link to="/">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <img
-                className="dark:hidden"
-                src="/images/logo/logo.png"
-                alt="Logo"
-                width={70}
-                height={20}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
-          ) : (
-            <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
-          )}
-        </Link>
-      </div>
+      ></div>
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
