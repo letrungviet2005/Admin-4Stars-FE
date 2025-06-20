@@ -53,6 +53,13 @@ const Video: React.FC = () => {
       <h1 className="text-2xl font-bold mb-6 text-blue-700">
         🎥 Video Bài Học
       </h1>
+      <div>
+        <input
+          type="text"
+          placeholder="🔍 Tìm video bài học..."
+          className="mb-6 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
 
       {videos.map((video) => (
         <div

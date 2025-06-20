@@ -46,6 +46,13 @@ export default function Article() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">📰 Danh sách bài viết</h1>
+      <div>
+        <input
+          type="text"
+          placeholder="🔍 Tìm bài viết..."
+          className="mb-6 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
 
       {/* Lưới bài viết */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
