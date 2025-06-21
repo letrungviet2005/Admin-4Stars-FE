@@ -241,12 +241,21 @@ const Vocabulary: React.FC = () => {
   return (
     <div className="grid-cols-1 md:grid-cols-2">
       <div className="bg-gray-100 p-4 rounded-md shadow mb-6">
-        <button
-          className="text-lg font-semibold mb-3"
-          onClick={() => ToggleaddVocabulary()}
-        >
-          ➕ Thêm từ vựng mới
-        </button>
+        {!addVocabulary ? (
+          <button
+            className="text-lg font-semibold mb-3"
+            onClick={() => ToggleaddVocabulary()}
+          >
+            ➕ Thêm từ vựng mới
+          </button>
+        ) : (
+          <button
+            className="text-lg font-semibold mb-3"
+            onClick={() => ToggleaddVocabulary()}
+          >
+            ❌ Hủy thêm từ vựng
+          </button>
+        )}
         {addVocabulary && (
           <div className="mb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
