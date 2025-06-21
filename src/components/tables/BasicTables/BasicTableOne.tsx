@@ -119,16 +119,22 @@ export default function UserTable() {
                   {user.role.name}
                 </TableCell>
                 <TableCell className="px-5 py-4 text-start">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={user.badge.image}
-                      alt={user.badge.name}
-                      className="w-6 h-6 rounded-full"
-                    />
-                    <span className="text-gray-700 dark:text-gray-300 text-sm">
-                      {user.badge.name}
+                  {user.badge ? (
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={user.badge.image}
+                        alt={user.badge.name}
+                        className="w-6 h-6 rounded-full"
+                      />
+                      <span className="text-gray-700 dark:text-gray-300 text-sm">
+                        {user.badge.name}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-gray-500 dark:text-gray-400 text-sm">
+                      Không có huy hiệu
                     </span>
-                  </div>
+                  )}
                 </TableCell>
                 <TableCell className="px-5 py-4 text-start text-gray-600 dark:text-gray-300">
                   {user.point}
