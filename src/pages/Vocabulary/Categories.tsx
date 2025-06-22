@@ -20,6 +20,7 @@ const Categories: React.FC = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [editInputs, setEditInputs] = useState({
     name: "",
     description: "",
@@ -43,7 +44,7 @@ const Categories: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const res = await fetch(
-        `${config}admin/categories?page=${page}&size=${size}&type=VOCABULARY`,
+        `${config}admin/categories?page=${page}&size=${size}&type=VVOCABULARY?`,
         {
           method: "GET",
           headers: {
@@ -57,7 +58,6 @@ const Categories: React.FC = () => {
         setCategories(data.data.result);
         const total = data.data.meta.total;
         setTotalPages(total);
-        console.log(total);
         const calculatedTotalPages = Math.ceil(total / size);
         setTotalPages(calculatedTotalPages || 1);
       } else {
@@ -264,6 +264,8 @@ const Categories: React.FC = () => {
         <input
           type="text"
           placeholder="🔍 Tìm loại..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="mb-6 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
@@ -346,12 +348,6 @@ const Categories: React.FC = () => {
                     {cat.description}
                   </p>
                 )}
-                <p
-                  onClick={() => navigate(`/vocabulary?category=${cat.id}`)}
-                  className="cursor-pointer text-xs text-gray-500 mt-3"
-                >
-                  Type: {cat.type}
-                </p>
               </>
             )}
           </div>
