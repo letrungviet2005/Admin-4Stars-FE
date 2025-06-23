@@ -12,7 +12,7 @@ export default function User() {
       />
       <PageBreadcrumb pageTitle="" />
       <div className="space-y-6">
-        <ComponentCard title="User Table">
+        <ComponentCard title="User">
           <BasicTableOne />
         </ComponentCard>
       </div>

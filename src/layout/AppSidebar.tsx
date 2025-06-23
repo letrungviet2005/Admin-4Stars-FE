@@ -57,14 +57,6 @@ const navItems: NavItem[] = [
     icon: <TableIcon />,
     subItems: [{ name: "User", path: "/user", pro: false }],
   },
-  {
-    name: "Members",
-    icon: <PageIcon />,
-    subItems: [
-      { name: "Members Register", path: "/member", pro: false },
-      { name: "Admin", path: "/admin", pro: false },
-    ],
-  },
 ];
 
 const othersItems: NavItem[] = [
