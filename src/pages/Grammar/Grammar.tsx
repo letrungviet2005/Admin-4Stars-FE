@@ -7,11 +7,7 @@ interface Grammar {
   name: string;
   description?: string;
   content?: string;
-  order_index?: number;
-  created_at?: string;
-  updated_at?: string;
-  created_by?: string;
-  updated_by?: string;
+  categoryId: number;
 }
 
 const Grammars: React.FC = () => {
@@ -19,16 +15,19 @@ const Grammars: React.FC = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(6);
+  const [loading, setLoading] = useState(false);
   const [editInputs, setEditInputs] = useState({
     name: "",
     description: "",
     content: "",
+    categoryId: 0,
   });
   const [showAddForm, setShowAddForm] = useState(false);
   const [newGrammar, setNewGrammar] = useState({
     name: "",
     description: "",
     content: "",
+    categoryId: 1, // bạn có thể cho người dùng chọn categoryId nếu cần
   });
 
   const accessToken = localStorage.getItem("accessToken");
@@ -41,6 +40,7 @@ const Grammars: React.FC = () => {
 
   const fetchGrammars = async () => {
     try {
+      setLoading(true);
       const response = await fetch(
         `${config}admin/grammars?page=${page}&size=${size}&sort=id,asc`,
         { method: "GET", headers }
@@ -51,6 +51,8 @@ const Grammars: React.FC = () => {
       setGrammars(data.data.result);
     } catch (error) {
       console.error("Error loading grammar categories:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,7 +69,7 @@ const Grammars: React.FC = () => {
       const created = await response.json();
       setGrammars((prev) => [...prev, created]);
       setShowAddForm(false);
-      setNewGrammar({ name: "", description: "", content: "" });
+      setNewGrammar({ name: "", description: "", content: "", categoryId: 1 });
     } catch (err) {
       console.error(err);
     }
@@ -79,6 +81,7 @@ const Grammars: React.FC = () => {
       name: item.name,
       description: item.description || "",
       content: item.content || "",
+      categoryId: item.categoryId,
     });
   };
 
@@ -86,7 +89,11 @@ const Grammars: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setEditInputs((prev) => ({ ...prev, [name]: value }));
+
+    setEditInputs((prev) => ({
+      ...prev,
+      [name]: name === "categoryId" ? Number(value) : value, // ép kiểu nếu là categoryId
+    }));
   };
 
   const handleSave = async (id: number) => {
@@ -216,93 +223,90 @@ const Grammars: React.FC = () => {
           </div>
         )}
       </div>
-      <div>
-        <input
-          type="text"
-          placeholder="🔍 Tìm ngữ pháp..."
-          className="mb-6 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {grammars.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white shadow-md rounded-xl p-4 border border-gray-200 hover:shadow-lg transition relative"
-          >
-            <div className="absolute top-2 right-2 flex gap-2">
+      {loading ? (
+        <div className="text-center text-blue-600">Đang tải dữ liệu...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {grammars.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white shadow-md rounded-xl p-4 border border-gray-200 hover:shadow-lg transition relative"
+            >
+              <div className="absolute top-2 right-2 flex gap-2">
+                {editingId === item.id ? (
+                  <>
+                    <button
+                      className="text-green-500"
+                      onClick={() => handleSave(item.id)}
+                    >
+                      ✅
+                    </button>
+                    <button
+                      className="text-gray-500"
+                      onClick={() => setEditingId(null)}
+                    >
+                      ❌
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className="text-blue-500"
+                      onClick={() => handleEditClick(item)}
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      className="text-red-500"
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      🗑️
+                    </button>
+                  </>
+                )}
+              </div>
+
               {editingId === item.id ? (
                 <>
-                  <button
-                    className="text-green-500"
-                    onClick={() => handleSave(item.id)}
-                  >
-                    ✅
-                  </button>
-                  <button
-                    className="text-gray-500"
-                    onClick={() => setEditingId(null)}
-                  >
-                    ❌
-                  </button>
+                  <input
+                    type="text"
+                    name="name"
+                    value={editInputs.name}
+                    onChange={handleInputChange}
+                    className="border rounded px-2 py-1 w-full mb-2 mt-5"
+                  />
+                  <textarea
+                    name="description"
+                    value={editInputs.description}
+                    onChange={handleInputChange}
+                    className="border rounded px-2 py-1 w-full mb-2"
+                  />
+                  <input
+                    type="text"
+                    name="content"
+                    value={editInputs.content}
+                    onChange={handleInputChange}
+                    className="border rounded px-2 py-1 w-full"
+                  />
                 </>
               ) : (
                 <>
-                  <button
-                    className="text-blue-500"
-                    onClick={() => handleEditClick(item)}
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    className="text-red-500"
-                    onClick={() => handleDelete(item.id)}
-                  >
-                    🗑️
-                  </button>
+                  <h3 className="text-lg font-semibold text-blue-600 mb-2 mt-5">
+                    {item.name}
+                  </h3>
+                  {item.description && (
+                    <p className="text-sm text-gray-600">{item.description}</p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-3">
+                    Nội dung: {item.content}
+                  </p>
                 </>
               )}
             </div>
-
-            {editingId === item.id ? (
-              <>
-                <input
-                  type="text"
-                  name="name"
-                  value={editInputs.name}
-                  onChange={handleInputChange}
-                  className="border rounded px-2 py-1 w-full mb-2 mt-5"
-                />
-                <textarea
-                  name="description"
-                  value={editInputs.description}
-                  onChange={handleInputChange}
-                  className="border rounded px-2 py-1 w-full mb-2"
-                />
-                <input
-                  type="text"
-                  name="content"
-                  value={editInputs.content}
-                  onChange={handleInputChange}
-                  className="border rounded px-2 py-1 w-full"
-                />
-              </>
-            ) : (
-              <>
-                <h3 className="text-lg font-semibold text-blue-600 mb-2 mt-5">
-                  {item.name}
-                </h3>
-                {item.description && (
-                  <p className="text-sm text-gray-600">{item.description}</p>
-                )}
-                <p className="text-xs text-gray-500 mt-3">
-                  Nội dung: {item.content}
-                </p>
-              </>
-            )}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <div className="flex justify-center items-center gap-3 mt-6">
         <button

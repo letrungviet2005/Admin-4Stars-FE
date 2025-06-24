@@ -567,7 +567,7 @@ const Vocabulary: React.FC = () => {
             ◀ Trước
           </button>
 
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+          {Array.from({ length: totalPages / 5 + 1 }, (_, i) => i + 1).map(
             (pageNum) => (
               <button
                 key={pageNum}
@@ -587,7 +587,7 @@ const Vocabulary: React.FC = () => {
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages / 5 + 1}
             className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
           >
             Sau ▶
