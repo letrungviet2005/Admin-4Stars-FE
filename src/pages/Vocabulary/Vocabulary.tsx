@@ -167,6 +167,34 @@ const Vocabulary: React.FC = () => {
       setTotalPages(1);
     }
   };
+  const handleSearch = async (word: string) => {
+    try {
+      setSearchQuery(word); // Cập nhật input khi người dùng gõ
+
+      if (word.trim() === "") {
+        loadVocabularies(1); // Nếu input rỗng, load lại toàn bộ danh sách
+        return;
+      }
+
+      const response = await fetch(`${config}admin/vocabularies?word=${word}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to search vocabularies");
+
+      const data = await response.json();
+      setVocabularies(data.data.result);
+      setTotalPages(1); // Khi search không cần phân trang
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Error searching vocabularies:", error);
+      alert("Lỗi khi tìm kiếm từ vựng!");
+    }
+  };
 
   const startEdit = (vocab: Vocabulary) => {
     setEditingId(vocab.id);
@@ -233,10 +261,6 @@ const Vocabulary: React.FC = () => {
   const ToggleaddVocabulary = () => {
     setAddVocabulary(!addVocabulary);
   };
-
-  const filteredVocabularies = vocabularies.filter((vocab) =>
-    vocab.word.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <div className="grid-cols-1 md:grid-cols-2">
@@ -385,15 +409,15 @@ const Vocabulary: React.FC = () => {
         type="text"
         placeholder="🔍 Tìm từ vựng..."
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChange={(e) => handleSearch(e.target.value)}
         className="mb-6 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 
-      {filteredVocabularies.length === 0 ? (
+      {vocabularies.length === 0 ? (
         <p className="text-gray-500">Không tìm thấy từ nào.</p>
       ) : (
         <ul className="space-y-6">
-          {filteredVocabularies.map((vocab) => (
+          {vocabularies.map((vocab) => (
             <li
               key={vocab.id}
               className="flex gap-6 items-center bg-white shadow-md rounded-lg p-4"
