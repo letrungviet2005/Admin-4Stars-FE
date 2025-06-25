@@ -55,7 +55,15 @@ const navItems: NavItem[] = [
   {
     name: "User",
     icon: <TableIcon />,
-    subItems: [{ name: "User", path: "/user", pro: false }],
+    subItems: [
+      { name: "User", path: "/user", pro: false },
+      { name: "Role", path: "/role", pro: false },
+    ],
+  },
+  {
+    name: "Plan",
+    icon: <PlugInIcon />,
+    subItems: [{ name: "Plan", path: "/plan", pro: false }],
   },
 ];
 
@@ -75,8 +83,6 @@ const othersItems: NavItem[] = [
       { name: "Alerts", path: "/alerts", pro: false },
       { name: "Avatar", path: "/avatars", pro: false },
       { name: "Badge", path: "/badge", pro: false },
-      { name: "Buttons", path: "/buttons", pro: false },
-      { name: "Images", path: "/images", pro: false },
     ],
   },
   {
